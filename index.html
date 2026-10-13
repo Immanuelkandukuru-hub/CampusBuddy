@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus Buddy | Student Task Manager</title>
+  
+  <!-- Google Fonts: Inter for modern, clean typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Supabase CDN (Official Client Library) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="header">
+      <div class="header-brand">
+        <div class="logo-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+          <h1>Campus Buddy</h1>
+          <p class="subtitle">Student Task & Assignment Manager</p>
+        </div>
+      </div>
+      <!-- Mode Badge: shows whether using Local Storage or Supabase Cloud -->
+      <div id="storageBadge" class="badge-status badge-local">
+        <i class="fa-solid fa-hard-drive"></i>
+        <span>Offline / Local Mode</span>
+      </div>
+    </header>
+
+    <!-- Overview Stats Bar -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon icon-total"><i class="fa-solid fa-list-check"></i></div>
+        <div class="stat-info">
+          <span class="stat-number" id="totalCount">0</span>
+          <span class="stat-label">Total Tasks</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-pending"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-info">
+          <span class="stat-number" id="pendingCount">0</span>
+          <span class="stat-label">Pending</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-completed"><i class="fa-solid fa-circle-check"></i></div>
+        <div class="stat-info">
+          <span class="stat-number" id="completedCount">0</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Task Creation Form Card -->
+      <section class="card form-card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-circle-plus"></i> Add New Task</h2>
+          <p>Keep track of homework, lab reports, assignments, and exams.</p>
+        </div>
+
+        <form id="taskForm" class="task-form">
+          <div class="form-group">
+            <label for="taskTitle">Task Name / Description <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-pen-to-square input-icon"></i>
+              <input 
+                type="text" 
+                id="taskTitle" 
+                placeholder="e.g., Submit Data Structures Assignment 1" 
+                required 
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="taskDueDate">Due Date <span class="required">*</span></label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-calendar-day input-icon"></i>
+                <input type="date" id="taskDueDate" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="taskCategory">Category / Subject</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-book-bookmark input-icon"></i>
+                <select id="taskCategory">
+                  <option value="Assignment">📝 Assignment</option>
+                  <option value="Lab Record">🔬 Lab Record</option>
+                  <option value="Exam Prep">📚 Exam Prep</option>
+                  <option value="Project">💻 Project</option>
+                  <option value="Personal">⭐ Personal</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="taskPriority">Priority</label>
+              <div class="input-wrapper">
+                <i class="fa-solid fa-flag input-icon"></i>
+                <select id="taskPriority">
+                  <option value="Medium">Medium</option>
+                  <option value="High">High 🚨</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" id="submitBtn" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Add Task
+          </button>
+        </form>
+      </section>
+
+      <!-- Task List Card -->
+      <section class="card list-card">
+        <div class="card-header flex-between">
+          <div>
+            <h2><i class="fa-solid fa-clipboard-list"></i> Your Tasks</h2>
+            <p id="filterSubtitle">Viewing all tasks</p>
+          </div>
+          
+          <!-- Filter Buttons -->
+          <div class="filter-group">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+          </div>
+        </div>
+
+        <!-- Task List Container -->
+        <ul id="taskList" class="task-list">
+          <!-- Tasks will be rendered dynamically by JavaScript -->
+        </ul>
+
+        <!-- Empty State (Shown when no tasks exist) -->
+        <div id="emptyState" class="empty-state">
+          <div class="empty-icon"><i class="fa-regular fa-calendar-check"></i></div>
+          <h3>No tasks found!</h3>
+          <p>You have no tasks in this view. Add a new task above to stay on top of your studies.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Built with ❤️ for B.Tech students &bull; <strong>Campus Buddy</strong></p>
+    </footer>
+
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast">Task added successfully!</div>
+
+  <!-- App Script -->
+  <script src="script.js"></script>
+</body>
+</html>
